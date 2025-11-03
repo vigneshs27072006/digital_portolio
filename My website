@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VGN Electronics — Order</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Poppins",sans-serif}
+body{background:#fff8f0;color:#333;line-height:1.6}
+header{display:flex;justify-content:space-between;align-items:center;background:#1e90ff;padding:12px 20px}
+.logo h1{color:#fff;font-size:22px}
+nav a{color:#fff;text-decoration:none;margin-left:12px}
+.hero{background:url("https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200")center/cover;height:38vh;display:flex;align-items:center;justify-content:center;color:#fff;position:relative}
+.hero::after{content:"";position:absolute;left:0;right:0;top:0;height:38vh;background:rgba(0,0,0,0.4)}
+.hero-content{position:relative;text-align:center;padding:20px}
+.container{max-width:1000px;margin:18px auto;padding:0 16px}
+.menu-items{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:18px}
+.card{background:#fff;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,.08);width:220px;padding:12px;text-align:center}
+.card img{width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px}
+.card h4{color:#1e90ff;margin-bottom:6px}
+.order-section{background:#fff3e6;padding:20px;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,.06)}
+.order-form{display:flex;flex-direction:column;gap:10px;max-width:700px;margin:0 auto}
+.order-row{display:flex;gap:8px;align-items:center}
+.order-row select,.order-row input[type="number"]{padding:8px;border-radius:8px;border:1px solid #ccc}
+.small-btn{background:#1e90ff;color:#fff;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
+.small-btn:hover{background:#4da6ff}
+#addItemBtn{width:170px;margin:0 auto}
+.order-meta input,.order-meta textarea{padding:8px;border-radius:8px;border:1px solid #ccc}
+.total{font-weight:700;margin-top:6px}
+.success{display:none;color:green;font-weight:700;margin-top:6px}
+.note{font-size:13px;color:#555}
+.summary-table{width:100%;border-collapse:collapse;margin-top:8px}
+.summary-table th,.summary-table td{border:1px solid #ddd;padding:8px;text-align:center}
+.summary-table th{background:#1e90ff;color:#fff}
+.footer{margin:24px 0;text-align:center;color:#666;font-size:14px}
+@media(max-width:700px){.order-row{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <h1>VGN Electronics</h1>
+  </div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#menu">Products</a>
+    <a href="#order">Order</a>
+    <a href="admin.html">Owner (Admin)</a>
+  </nav>
+</header>
+
+<section class="hero" id="home">
+  <div class="hero-content">
+    <h2>Latest Gadgets & Electronics 🔌</h2>
+    <p style="position:relative;z-index:1">Order your favorite electronics — delivered or for pickup.</p>
+  </div>
+</section>
+
+<div class="container">
+  <section id="menu">
+    <h2 style="text-align:center;margin:16px 0">Our Products</h2>
+    <div class="menu-items" aria-hidden="true">
+      <div class="card"><img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600" alt="Smartphone"><h4>Smartphone</h4><div>₹20,000</div></div>
+      <div class="card"><img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600" alt="Laptop"><h4>Laptop</h4><div>₹55,000</div></div>
+      <div class="card"><img src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=600" alt="Headphones"><h4>Headphones</h4><div>₹3,500</div></div>
+    </div>
+  </section>
+
+  <section id="order" class="order-section" aria-labelledby="orderHeading">
+    <h2 id="orderHeading">Place Your Order</h2>
+    <p class="note">You can add multiple devices. Owner can view orders on the admin page.</p>
+
+    <form id="orderForm" class="order-form" autocomplete="off">
+      <div id="orderItems">
+        <div class="order-row order-item">
+          <select class="food-select" required>
+            <option value="">Select Item</option>
+            <option value="Smartphone" data-price="20000">Smartphone - ₹20,000</option>
+            <option value="Laptop" data-price="55000">Laptop - ₹55,000</option>
+            <option value="Headphones" data-price="3500">Headphones - ₹3,500</option>
+          </select>
+          <input type="number" class="quantity" min="1" value="1" required aria-label="Quantity">
+          <button type="button" class="small-btn removeBtn" style="display:none">Remove</button>
+        </div>
+      </div>
+
+      <button type="button" id="addItemBtn" class="small-btn">+ Add Another Device</button>
+
+      <div id="previewArea" style="margin-top:8px;display:none">
+        <strong>Order Preview</strong>
+        <table class="summary-table" id="previewTable">
+          <thead><tr><th>Device</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:8px" class="order-meta">
+        <input type="text" id="customerName" placeholder="Your Name" required>
+        <input type="tel" id="customerPhone" placeholder="Phone Number" required style="margin-top:8px">
+        <textarea id="customerAddress" placeholder="Delivery Address (or pickup details)" rows="3" required style="margin-top:8px"></textarea>
+      </div>
+
+      <div class="total">Total: ₹<span id="totalAmount">0</span></div>
+
+      <button type="submit" class="small-btn" style="margin-top:10px">Confirm Order</button>
+
+      <div id="success" class="success">✅ Order placed successfully! We will contact you soon.</div>
+    </form>
+
+    <p class="note" style="margin-top:10px">Owner tip: open the <code>admin.html</code> page and enter your password to view orders saved locally.</p>
+  </section>
+
+  <div class="footer">© VGN Electronics</div>
+</div>
+
+<script>
+(function(){
+  const orderItems = document.getElementById('orderItems');
+  const addItemBtn = document.getElementById('addItemBtn');
+  const previewArea = document.getElementById('previewArea');
+  const previewTableBody = document.querySelector('#previewTable tbody');
+  const totalAmountSpan = document.getElementById('totalAmount');
+  const orderForm = document.getElementById('orderForm');
+  const success = document.getElementById('success');
+
+  function createRow() {
+    const div = document.createElement('div');
+    div.className = 'order-row order-item';
+    div.innerHTML = `
+      <select class="food-select" required>
+        <option value="">Select Item</option>
+        <option value="Smartphone" data-price="20000">Smartphone - ₹20,000</option>
+        <option value="Laptop" data-price="55000">Laptop - ₹55,000</option>
+        <option value="Headphones" data-price="3500">Headphones - ₹3,500</option>
+      </select>
+      <input type="number" class="quantity" min="1" value="1" required>
+      <button type="button" class="small-btn removeBtn">Remove</button>
+    `;
+    div.querySelector('.removeBtn').addEventListener('click', () => { div.remove(); recalc(); });
+    div.querySelector('.food-select').addEventListener('change', recalc);
+    div.querySelector('.quantity').addEventListener('input', recalc);
+    return div;
+  }
+
+  (function initFirstRow(){
+    const first = orderItems.querySelector('.order-item');
+    first.querySelector('.food-select').addEventListener('change', recalc);
+    first.querySelector('.quantity').addEventListener('input', recalc);
+  })();
+
+  addItemBtn.addEventListener('click', () => { orderItems.appendChild(createRow()); recalc(); });
+
+  function recalc() {
+    const rows = orderItems.querySelectorAll('.order-item');
+    let total = 0;
+    previewTableBody.innerHTML = '';
+    rows.forEach(row => {
+      const select = row.querySelector('.food-select');
+      const qty = parseInt(row.querySelector('.quantity').value) || 0;
+      const price = parseInt(select.selectedOptions[0]?.dataset.price || 0);
+      if (!select.value) return;
+      const subtotal = price * qty;
+      total += subtotal;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${select.value}</td><td>${qty}</td><td>₹${price}</td><td>₹${subtotal}</td>`;
+      previewTableBody.appendChild(tr);
+    });
+    previewArea.style.display = previewTableBody.children.length ? 'block' : 'none';
+    totalAmountSpan.textContent = total;
+  }
+
+  function saveOrder(orderObj) {
+    const key = 'vgn_orders';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.push(orderObj);
+    localStorage.setItem(key, JSON.stringify(list));
+  }
+
+  orderForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const rows = orderItems.querySelectorAll('.order-item');
+    const items = [];
+    let grand = 0;
+    rows.forEach(row => {
+      const select = row.querySelector('.food-select');
+      const qty = parseInt(row.querySelector('.quantity').value) || 0;
+      const price = parseInt(select.selectedOptions[0]?.dataset.price || 0);
+      if (!select.value) return;
+      items.push({ name: select.value, qty, price, subtotal: price*qty });
+      grand += price*qty;
+    });
+    if(items.length===0){ alert('Please select at least one item.'); return; }
+    const orderObj = {
+      id:'ORD'+Date.now(),
+      createdAt:new Date().toISOString(),
+      customerName: document.getElementById('customerName').value.trim(),
+      customerPhone: document.getElementById('customerPhone').value.trim(),
+      customerAddress: document.getElementById('customerAddress').value.trim(),
+      items,
+      total: grand
+    };
+    saveOrder(orderObj);
+    success.style.display='block';
+    orderItems.innerHTML='';
+    const base=document.createElement('div');
+    base.className='order-row order-item';
+    base.innerHTML=`
+      <select class="food-select" required>
+        <option value="">Select Item</option>
+        <option value="Smartphone" data-price="20000">Smartphone - ₹20,000</option>
+        <option value="Laptop" data-price="55000">Laptop - ₹55,000</option>
+        <option value="Headphones" data-price="3500">Headphones - ₹3,500</option>
+      </select>
+      <input type="number" class="quantity" min="1" value="1" required>
+      <button type="button" class="small-btn removeBtn" style="display:none">Remove</button>
+    `;
+    orderItems.appendChild(base);
+    base.querySelector('.food-select').addEventListener('change', recalc);
+    base.querySelector('.quantity').addEventListener('input', recalc);
+    document.getElementById('customerName').value='';
+    document.getElementById('customerPhone').value='';
+    document.getElementById('customerAddress').value='';
+    previewTableBody.innerHTML='';
+    previewArea.style.display='none';
+    totalAmountSpan.textContent='0';
+    setTimeout(()=>success.style.display='none',3500);
+  });
+})();
+</script>
+
+</body>
+</html>
