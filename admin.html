@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VGN Electronics — Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Poppins",sans-serif}
+body{background:#f6f6f6;color:#222;padding:18px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.header h1{color:#1e90ff}
+.box{background:#fff;padding:16px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.06);max-width:1100px;margin:0 auto}
+.login-area{max-width:480px;margin:24px auto;display:flex;flex-direction:column;gap:8px}
+.login-area input{padding:10px;border-radius:8px;border:1px solid #ccc}
+.login-area button{background:#1e90ff;color:#fff;padding:10px;border-radius:8px;border:none;cursor:pointer}
+.note{font-size:13px;color:#555;margin-top:8px}
+.table-wrap{overflow:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#1e90ff;color:#fff}
+.small-btn{padding:8px 10px;border-radius:8px;border:none;background:#1e90ff;color:#fff;cursor:pointer}
+.controls{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.empty{color:#777;padding:16px;text-align:center}
+.order-items-table th, .order-items-table td{text-align:center}
+@media(max-width:800px){.header{flex-direction:column;gap:8px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>VGN Electronics — Owner Dashboard</h1>
+  <a href="index.html">← Go to Customer Page</a>
+</div>
+
+<div class="box">
+  <div id="loginBox" class="login-area" aria-live="polite">
+    <label><strong>Enter Owner Password to view orders</strong></label>
+    <input type="password" id="adminPassword" placeholder="Owner password" />
+    <div style="display:flex;gap:8px">
+      <button id="loginBtn" class="small-btn">Unlock Orders</button>
+      <button id="clearAllBtn" class="small-btn" style="background:#777">Clear All Orders</button>
+    </div>
+    <div class="note">Demo note: Password is stored in this file (client-side). For production use server-side auth.</div>
+  </div>
+
+  <div id="ordersArea" style="display:none">
+    <div class="controls">
+      <button id="refreshBtn" class="small-btn">Refresh</button>
+      <button id="exportBtn" class="small-btn" title="Download orders as JSON">Export JSON</button>
+      <button id="clearBtn" class="small-btn" style="background:#d9534f">Clear Orders</button>
+    </div>
+
+    <div id="ordersList" class="table-wrap" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const ADMIN_PASSWORD = 'vgnowner123';
+  const loginBtn = document.getElementById('loginBtn');
+  const adminPasswordInput = document.getElementById('adminPassword');
+  const ordersArea = document.getElementById('ordersArea');
+  const loginBox = document.getElementById('loginBox');
+  const ordersList = document.getElementById('ordersList');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+
+  function getOrders(){
+    return JSON.parse(localStorage.getItem('vgn_orders') || '[]');
+  }
+
+  function renderOrders(){
+    const orders = getOrders();
+    if (!orders.length) {
+      ordersList.innerHTML = '<div class="empty">No orders yet.</div>';
+      return;
+    }
+    let html = '';
+    orders.slice().reverse().forEach(order => {
+      html += `
+        <div style="border:1px solid #eee;padding:12px;border-radius:8px;margin-bottom:12px;background:#fafafa">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <div><strong>Order ID:</strong> ${order.id}</div>
+            <div><strong>Time:</strong> ${new Date(order.createdAt).toLocaleString()}</div>
+            <div><strong>Total:</strong> ₹${order.total}</div>
+          </div>
+          <div style="margin-top:8px"><strong>Customer:</strong> ${escapeHtml(order.customerName)} — ${escapeHtml(order.customerPhone)}</div>
+          <div style="margin-top:6px"><strong>Address:</strong> ${escapeHtml(order.customerAddress)}</div>
+          <div style="margin-top:10px">
+            <table class="order-items-table" style="width:100%;border-collapse:collapse">
+              <thead><tr><th>Device</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+              <tbody>
+                ${order.items.map(i => `<tr><td>${escapeHtml(i.name)}</td><td>${i.qty}</td><td>₹${i.price}</td><td>₹${i.subtotal}</td></tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
+            <button class="small-btn" data-id="${order.id}" onclick="deleteOrder(event)">Delete</button>
+          </div>
+        </div>
+      `;
+    });
+    ordersList.innerHTML = html;
+  }
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  window.deleteOrder = function(e){
+    const id = e.target.dataset.id;
+    if (!confirm('Delete this order?')) return;
+    let orders = getOrders();
+    orders = orders.filter(o => o.id !== id);
+    localStorage.setItem('vgn_orders', JSON.stringify(orders));
+    renderOrders();
+  }
+
+  loginBtn.addEventListener('click', () => {
+    const val = adminPasswordInput.value;
+    if (val === ADMIN_PASSWORD) {
+      loginBox.style.display = 'none';
+      ordersArea.style.display = 'block';
+      renderOrders();
+    } else {
+      alert('Incorrect password');
+    }
+  });
+
+  refreshBtn.addEventListener('click', renderOrders);
+
+  exportBtn.addEventListener('click', () => {
+    const orders = getOrders();
+    const blob = new Blob([JSON.stringify(orders, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'vgn_orders.json'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    if (!confirm('Clear all saved orders? This cannot be undone on this device.')) return;
+    localStorage.removeItem('vgn_orders');
+    renderOrders();
+  });
+
+  clearAllBtn.addEventListener('click', () => {
+    if (!confirm('This will clear all orders without unlocking admin. Proceed?')) return;
+    localStorage.removeItem('vgn_orders');
+    alert('All orders cleared.');
+  });
+
+})();
+</script>
+
+</body>
+</html>
